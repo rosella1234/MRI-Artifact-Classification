@@ -1,147 +1,130 @@
-# MRI Artifact Classification Using Machine Learning and Deep Learning
+# MRI Artifact Classification — Machine Learning and Deep Learning
 
-**Repository:** `MRI-Artifact-Classification`
+Python source code developed for a master's thesis project in collaboration with **ASG Superconductors S.p.A.**. The project compares a feature-based **Random Forest** classifier with a **ResNet-18** convolutional neural network (CNN) for MRI artifact severity classification, including independent validation, application to images acquired before and after system calibration, and statistical comparison of the two approaches.
 
-Python workflows for **MRI artifact classification**, developed as part of a master's thesis project in collaboration with **ASG Superconductors S.p.A.** The project compares a feature-based **Random Forest** classifier with a **ResNet-18** convolutional neural network (CNN), using a shared test set. It also includes independent validation, statistical comparison, and an application to MRI images acquired before and after calibration.
-
-## Project objectives
-
-- Classify MRI images according to artifact classes using machine learning (ML) and deep learning (DL).
-- Compare a Random Forest model based on handcrafted image features with a ResNet-18 CNN.
-- Evaluate both approaches on the **same test images**.
-- Validate the trained models on a separate set of **eight DICOM images**.
-- Compare predictive performance using classification results and statistical tests involving **accuracy** and **quadratic weighted kappa (QWK)**.
-- Apply the trained models to **pre- and post-calibration images** to investigate whether the predicted classifications shift from **class 0** toward **classes 2/3** after calibration.
-
-> **Scope:** The class numbering and the expected pre/post-calibration shift follow the thesis project documentation. The detailed clinical or technical definition of each class should be taken from the original ASG labeling protocol; it is not specified here.
-
-## Methods
-
-| Workflow | Model | Input/representation | Key outputs |
-| --- | --- | --- | --- |
-| Machine learning | Random Forest | Handcrafted features based on GLCM, Sobel, and FFT | Predictions, performance metrics, confusion matrix, saved `.pkl` model |
-| Deep learning | ResNet-18 CNN | MRI images converted to `.npy` for model development | Predictions, classification report, confusion matrix, saved `.pth` weights |
-| External validation | Trained Random Forest and CNN | Eight designated DICOM images | Validation predictions and Excel reports |
-| Calibration application | Trained Random Forest and CNN | Pre- and post-calibration MRI images | Classification results for comparison |
-| Statistical comparison | Python analysis | Accuracy and QWK results | Comparison table, three plots, and confusion matrices |
-
-The manual annotations in `classification.xlsx` are the ground-truth labels supplied by ASG Superconductors S.p.A. The file `ml_test_ids.xlsx` defines the shared test set used by the ML and DL workflows. This common test set is important for a fair comparison of the two approaches.
+> **Code-only release.** This repository contains the Python scripts, not the complete thesis archive. It does **not** distribute MRI images, DICOM files, manual annotations, calibration data, training/test spreadsheets, model weights, output figures, or evaluation results.
 
 ## Repository structure
 
-The following is the organization described in the thesis handover guide. Datasets, trained model files, reports, and thesis documents are **listed for orientation** and do not necessarily need to be published in this GitHub repository.
-
 ```text
-Firpo_Thesis_Project/
+Firpo_Thesis_Project_code/
 ├── README.md
-├── [thesis presentation and thesis PDF]
+├── requirements.txt
+├── .gitignore
 ├── ASG_Application/
-│   ├── [pre-calibration and post-calibration image datasets]
-│   ├── [classification results for both models]
 │   ├── validation_CNN_fromFolder.py
 │   └── validation_RF_fromFolder.py
 └── MachineLearning_&_DeepLearning/
-    ├── dataset/
-    │   ├── images/
-    │   ├── DicomForValidation/         # Eight DICOM images
-    │   ├── classification.xlsx         # ASG manual reference labels
-    │   └── ml_test_ids.xlsx            # Shared ML/DL test-set IDs
     ├── Machine_Learning/
-    │   ├── Progressive_Steps/          # Four intermediate experiments
+    │   ├── Progressive_Steps/
+    │   │   ├── results_script2.3/
+    │   │   │   └── script2.3.py
+    │   │   ├── results_try2.3_cross/
+    │   │   │   └── script_try2.3_cross.py
+    │   │   ├── results_confirm_cross/
+    │   │   │   └── script9.py
+    │   │   └── results_prove_fft/
+    │   │       └── prove_fft.py
     │   └── Results_ML_Firpo_+Val/
     │       ├── ML_Code.py
-    │       ├── validation_firpo.py
-    │       ├── [trained Random Forest .pkl]
-    │       └── [metrics, predictions, and validation results]
+    │       └── validation_firpo.py
     ├── Deep_Learning/
-    │   ├── npyCOP1GEMNOGRAD/           # Converted .npy image data
     │   └── results_forced_test_60epochs_cnn_cop1_gemOptim_docker/
     │       ├── forced_test_60_epo_cnn_COP1_Gem_optim.py
-    │       ├── visualize_CNN_Feature_NoGrid.py
-    │       ├── valid_CNN.py
-    │       ├── resnet_mri_artifacts.pth
-    │       └── [classification reports and validation results]
+    │       ├── Valid_CNN_Forced.py
+    │       └── visualize_CNN_Feature_NoGrid.py
     └── test_statistico_RC2/
-        ├── test_statistico_RC.py
-        └── [statistical tables, figures, and confusion matrices]
+        └── test_statistico_RC.py
 ```
 
-**Folder-name note:** The guide uses slightly different spellings for the top-level development folder (`MachineLearning_&_DeepLearning` and `Machine_Learning_&_DeepLearning`). Check the actual folder name when adding files or adapting script paths.
+The above tree reflects **all 12 Python scripts actually present** in the two supplied code archives. The original directory names are preserved. Filenames in the original thesis handover document may differ slightly; in particular, the included CNN validation script is named `Valid_CNN_Forced.py`.
 
 ## Workflow
 
-### 1. Dataset and reference labels
+### 1. Classical machine learning: Random Forest
 
-The `dataset/` directory contains the MRI images and the original manual classifications. The ML and DL branches should use the same designated test subjects/images from `ml_test_ids.xlsx` when comparing their performance.
+`MachineLearning_&_DeepLearning/Machine_Learning/`
 
-Additional spreadsheets (`consensus.xlsx`, `Analysis_Simona_Data.xlsx`, and `Consensus_Analisi_Media.xlsx`) are mentioned in the project guide but **were not used by the supplied workflows**, according to that document.
+- `Progressive_Steps/results_script2.3/script2.3.py`: an intermediate Random Forest experiment.
+- `Progressive_Steps/results_try2.3_cross/script_try2.3_cross.py`: an intermediate cross-validation experiment.
+- `Progressive_Steps/results_confirm_cross/script9.py`: a further cross-validation/feature-combination experiment.
+- `Progressive_Steps/results_prove_fft/prove_fft.py`: an experiment involving FFT-related image features.
+- `Results_ML_Firpo_+Val/ML_Code.py`: the main Random Forest workflow, using handcrafted GLCM, Sobel, and FFT features, hyperparameter search, five-fold stratified cross-validation on the training data, test-set evaluation, and saving a trained model and feature-column order.
+- `Results_ML_Firpo_+Val/validation_firpo.py`: apply the saved Random Forest and feature-column information to a separate folder of DICOM images (eight images in the original validation exercise).
 
-### 2. Machine learning: Random Forest
+The final ML training script implements an 80/20 stratified split (`random_state=42`) and evaluates accuracy and quadratic weighted kappa (QWK). The original project dataset and outputs are **not included**.
 
-The main script is:
+### 2. Deep learning: ResNet-18
 
-`Machine_Learning/Results_ML_Firpo_+Val/ML_Code.py`
+`MachineLearning_&_DeepLearning/Deep_Learning/results_forced_test_60epochs_cnn_cop1_gemOptim_docker/`
 
-The final ML pipeline extracts image features based on **gray-level co-occurrence matrices (GLCM)**, **Sobel filtering**, and the **fast Fourier transform (FFT)** and uses them for Random Forest classification. The corresponding output folder contains the trained model in `.pkl` format, model metrics, a confusion matrix, and predictions on the test set.
+- `forced_test_60_epo_cnn_COP1_Gem_optim.py`: image preparation, training and evaluation of a four-class, single-channel ResNet-18; reads a predefined list of ML test-image IDs so both classifiers can be evaluated on the same held-out images. Generates model weights, per-image predictions, a classification report, a confusion matrix, and per-epoch training metrics in a spreadsheet.
+- `Valid_CNN_Forced.py`: validate saved CNN weights on a separate DICOM image folder.
+- `visualize_CNN_Feature_NoGrid.py`: visualize input images and model-derived feature representations.
 
-`Machine_Learning/Progressive_Steps/` preserves four groups of intermediate experiments, each with the associated Python code, model metrics, and test predictions.
+The CNN script uses a separate training/validation division from the non-test images, and reports accuracy, QWK, and adjacent-class accuracy.
 
-### 3. Deep learning: ResNet-18
+### 3. Model application to pre- and post-calibration images
 
-The main CNN script is:
+`ASG_Application/`
 
-`Deep_Learning/results_forced_test_60epochs_cnn_cop1_gemOptim_docker/forced_test_60_epo_cnn_COP1_Gem_optim.py`
+- `validation_RF_fromFolder.py`: load the trained Random Forest and its ordered feature list, classify DICOM files arranged into sequence folders, summarize predicted classes, and export an Excel report.
+- `validation_CNN_fromFolder.py`: perform the equivalent sequence-level analysis with the saved ResNet-18 weights.
 
-The DL branch uses images converted to `.npy` and a **ResNet-18** classifier. The final results directory includes the saved network weights (`resnet_mri_artifacts.pth`) and test-set classification outputs, including the classification report, confusion matrix, and individual predictions.
+These scripts were used in the thesis to investigate shifts from pre-calibration class 0 toward post-calibration classes 2/3. The code's outputs are predictions and summaries; they should not be interpreted as independently establishing a causal calibration effect.
 
-`visualize_CNN_Feature_NoGrid.py` produces visual representations of features learned by the network; the corresponding figures were stored in an `individual_plots` output directory.
+### 4. Statistical comparison
 
-### 4. Validation on eight DICOM images
+`MachineLearning_&_DeepLearning/test_statistico_RC2/test_statistico_RC.py`
 
-The `DicomForValidation/` folder contains eight designated images used for a separate validation exercise.
+This script loads both models' per-image prediction spreadsheets, aligns records by image ID and checks agreement between reference labels. It calculates accuracy, QWK, and macro F1; applies **McNemar's test** to paired correctness outcomes; and uses **10,000 paired bootstrap resamples** for QWK and macro-F1 differences. It writes comparison graphics and an Excel summary.
 
-- Random Forest: `Machine_Learning/Results_ML_Firpo_+Val/validation_firpo.py` (results in `validation_risultati.xlsx`).
-- CNN: `Deep_Learning/results_forced_test_60epochs_cnn_cop1_gemOptim_docker/valid_CNN.py` (results in `Validation_CNN_Forced.xlsx`).
+## Requirements
 
-### 5. Statistical comparison
+Install the dependencies imported by the scripts, for example:
 
-`test_statistico_RC2/test_statistico_RC.py` performs the statistical comparison described in the thesis materials using **accuracy** and **QWK**. Its outputs include an Excel comparison table, three plots, and two confusion matrices.
+```bash
+python -m pip install -r requirements.txt
+```
 
-The specific statistical tests, their assumptions, and numerical outcomes should be verified directly in the script and final thesis rather than inferred from this README.
+`requirements.txt` lists the identifiable third-party dependencies **without version pins**, as original environment details were not supplied. A compatible PyTorch/torchvision installation (CPU or CUDA as appropriate) must be selected for the target machine. This is a source archive, **not a tested turnkey pipeline**.
 
-### 6. Application to ASG pre/post-calibration images
+## Preparing your local data and paths
 
-The `ASG_Application/` folder contains the application-stage datasets and outputs. Its scripts are:
+The source scripts were preserved **unchanged** from the provided archives. Several use absolute Windows paths from the original development computer, and others assume particular relative directories. **Edit their input/output paths before execution.** Key dependencies are:
 
-- `validation_RF_fromFolder.py` — apply the Random Forest model to images in a folder.
-- `validation_CNN_fromFolder.py` — apply the CNN model to images in a folder.
+| Workflow | External inputs | Typical outputs |
+| --- | --- | --- |
+| ML training | DICOM image folder, labeled `Classification.xlsx` | Random Forest `.pkl`, `feature_columns.pkl`, test predictions and metrics |
+| RF validation / ASG application | DICOM image folders, trained RF `.pkl`, ordered feature list `.pkl` | Validation or sequence-level `.xlsx` |
+| CNN training | DICOM images, classification spreadsheet, `ml_test_ids.xlsx` | ResNet `.pth`, test predictions, reports and other `.xlsx` files |
+| CNN validation / ASG application | DICOM image folders, trained ResNet `.pth` | Validation or sequence-level `.xlsx` |
+| CNN visualization | DICOM images and ResNet `.pth` | Visualization figures |
+| Statistical analysis | Paired per-image predictions from both models | Comparison `.xlsx` and `.png` charts |
 
-This stage examines model predictions before and after calibration, particularly the proposed shift from class 0 to classes 2/3. This describes the **evaluation objective**, not a guaranteed outcome for every image.
+In particular:
 
-## Setup and execution
+1. `ML_Code.py` and the progressive ML scripts refer to dataset locations under `C:/Users/...` rather than a repository-relative `dataset` directory.
+2. `forced_test_60_epo_cnn_COP1_Gem_optim.py` derives its `BASE_DIR` from the **script's own directory**, then expects `dataset/Classification.xlsx`, `dataset/images/`, and `dataset/ml_test_ids.xlsx` beneath that directory. The inputs are absent from this code-only release.
+3. `test_statistico_RC.py` includes hard-coded prediction-file paths. Check that these correspond to the desired **final Random Forest and ResNet-18 outputs** before using its statistical results.
+4. The file names and column schemas in the input spreadsheets must match each script's expectations; see the relevant source files.
+5. The RF training script contains an interactive prompt for plotting a selected image. It is not a fully unattended command-line pipeline.
 
-The original project scripts should be considered the authoritative source for exact dependency versions, input paths, command-line parameters, and execution order. These details cannot be established from the project directory guide alone.
+Once the paths and inputs have been configured, the scripts can be run as ordinary Python files. For example, from the repository root:
 
-1. Set up a Python environment with the dependencies required by the individual scripts.
-2. Make the project data available in the paths expected by the scripts, or update their path configurations.
-3. Run the ML or DL workflow and use `ml_test_ids.xlsx` to preserve the common evaluation set.
-4. Run the DICOM validation scripts with the corresponding trained model files.
-5. Run `test_statistico_RC.py` after generating the model evaluation results.
-6. Apply the two folder-based validation scripts to the pre/post-calibration datasets.
+```bash
+python 'MachineLearning_&_DeepLearning/test_statistico_RC2/test_statistico_RC.py'
+```
 
-**Reproducibility checklist before release:** inspect hard-coded file paths; document Python and library versions; add a tested `requirements.txt` or environment file; confirm model input preprocessing, label mapping, train/test handling, and command-line usage; and verify whether pretrained weights and datasets can legally be shared.
+This illustrative command **requires existing paired prediction spreadsheets at the paths defined inside the script**; running it on a fresh code-only checkout will fail until configured.
 
-## Data availability and confidentiality
+## Notes on reproducibility and sharing
 
-The source MRI images, manual annotations, pretrained/trained model files, and calibration datasets may be subject to ASG Superconductors' ownership or confidentiality restrictions. **Do not upload them publicly without the relevant authorization.** If these materials cannot be redistributed, the repository can still publish the approved Python code, documentation, and instructions for obtaining or preparing compatible data.
-
-No license or public dataset access terms are asserted in this README. Add an appropriate `LICENSE` file only after confirming permission and the intended distribution terms.
+- The code archives were checked for Python files and their import statements, but no full training, inference, or statistical run was performed without the original data and models.
+- Model checkpoints (`.pth`, `.pkl`), generated plots (`.png`), predictions (`.xlsx`), imaging data, and institutional material were intentionally excluded from this release.
+- Before publishing to a **public** GitHub repository, inspect the scripts for developer-specific absolute paths, metadata, and other material that should not be disclosed. Confirm permission to share the source code with the relevant project stakeholders, including ASG Superconductors S.p.A., where applicable.
+- No license is declared in this repository package; one should only be added after the applicable rights and permissions are established.
 
 ## Acknowledgments
 
-This work was developed within a master's thesis project in collaboration with **ASG Superconductors S.p.A.**
-
-## Citation
-
-If using this repository in academic work, cite the associated thesis or any subsequent publication once its full bibliographic information is available.
-
+This work was developed as part of a master's thesis project in collaboration with **ASG Superconductors S.p.A.**
