@@ -1,6 +1,6 @@
 # MRI Artifact Classification Using Machine Learning and Deep Learning
 
-**Repository:** `MRI-Artifact-Classification-ML-DL`
+**Repository:** `MRI-Artifact-Classification`
 
 Python workflows for **MRI artifact classification**, developed as part of a master's thesis project in collaboration with **ASG Superconductors S.p.A.** The project compares a feature-based **Random Forest** classifier with a **ResNet-18** convolutional neural network (CNN), using a shared test set. It also includes independent validation, statistical comparison, and an application to MRI images acquired before and after calibration.
 
